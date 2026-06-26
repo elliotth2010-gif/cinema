@@ -40,6 +40,7 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+        <!-- Scraped sessions list (mainstream cinemas) -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_sessions"
             android:layout_width="match_parent"
@@ -80,6 +81,20 @@
                 android:text="@string/action_view_online" />
 
         </LinearLayout>
+
+        <!-- WebView for arthouse cinemas (JS-rendered sites that can't be scraped) -->
+        <WebView
+            android:id="@+id/web_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+        <ProgressBar
+            android:id="@+id/web_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
 
     </FrameLayout>
 

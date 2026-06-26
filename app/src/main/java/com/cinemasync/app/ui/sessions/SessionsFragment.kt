@@ -8,6 +8,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebChromeClient
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -59,14 +62,50 @@ class SessionsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupToolbar()
         setupAdapter()
+        setupWebView()
         setupDateChips()
         setupViewOnlineButton()
         observeState()
+        observeWebView()
         viewModel.loadSessions(args.cinemaId)
     }
 
     private fun setupToolbar() {
         binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
+    }
+
+    @android.annotation.SuppressLint("SetJavaScriptEnabled")
+    private fun setupWebView() {
+        binding.webView.apply {
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+            settings.loadWithOverviewMode = true
+            settings.useWideViewPort = true
+            webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView, url: String) {
+                    binding.webProgress.isVisible = false
+                }
+            }
+            webChromeClient = WebChromeClient()
+        }
+    }
+
+    private fun observeWebView() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.webViewUrl.collect { url ->
+                    if (url != null) {
+                        // Switch to WebView mode — hide the scraped list UI
+                        binding.recyclerSessions.isVisible = false
+                        binding.progressBar.isVisible = false
+                        binding.layoutEmpty.isVisible = false
+                        binding.webView.isVisible = true
+                        binding.webProgress.isVisible = true
+                        binding.webView.loadUrl(url)
+                    }
+                }
+            }
+        }
     }
 
     private fun setupViewOnlineButton() {

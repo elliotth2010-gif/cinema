@@ -5,13 +5,17 @@ import androidx.lifecycle.viewModelScope
 import com.cinemasync.app.data.model.Cinema
 import com.cinemasync.app.data.model.Movie
 import com.cinemasync.app.data.model.Session
+import com.cinemasync.app.data.remote.scrapers.ArthouseCinemaRegistry
 import com.cinemasync.app.data.repository.CinemaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 data class SessionDisplayItem(
@@ -37,13 +41,24 @@ class SessionsViewModel @Inject constructor(
     private val _cinemaWebsiteUrl = MutableStateFlow("")
     val cinemaWebsiteUrl: StateFlow<String> = _cinemaWebsiteUrl.asStateFlow()
 
+    private val _webViewUrl = MutableStateFlow<String?>(null)
+    /** Non-null when the cinema is an arthouse venue; the Fragment should show a WebView. */
+    val webViewUrl: StateFlow<String?> = _webViewUrl.asStateFlow()
+
     private var currentCinemaId: String? = null
     private var selectedDateMs: Long = todayMs()
+    private var arthouseVenue: com.cinemasync.app.data.remote.scrapers.ArthouseVenue? = null
 
     fun loadSessions(cinemaId: String) {
         currentCinemaId = cinemaId
         viewModelScope.launch {
-            repository.getCinemaById(cinemaId)?.let { _cinemaWebsiteUrl.value = it.websiteUrl }
+            val cinema = repository.getCinemaById(cinemaId) ?: return@launch
+            _cinemaWebsiteUrl.value = cinema.websiteUrl
+            val venue = ArthouseCinemaRegistry.venueForCinema(cinema)
+            arthouseVenue = venue
+            if (venue != null) {
+                _webViewUrl.value = urlForDate(venue, selectedDateMs)
+            }
         }
         viewModelScope.launch {
             repository.getSessionsForCinema(cinemaId).collect { sessions ->
@@ -60,7 +75,12 @@ class SessionsViewModel @Inject constructor(
 
     fun selectDate(dateMs: Long) {
         selectedDateMs = dateMs
-        refreshSessions()
+        arthouseVenue?.let { _webViewUrl.value = urlForDate(it, dateMs) } ?: refreshSessions()
+    }
+
+    private fun urlForDate(venue: com.cinemasync.app.data.remote.scrapers.ArthouseVenue, dateMs: Long): String {
+        val date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(dateMs))
+        return venue.sessionsUrlTemplate.replace("{date}", date)
     }
 
     private fun refreshSessions() {
