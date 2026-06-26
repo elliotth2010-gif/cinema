@@ -14,4 +14,6 @@
     <string name="pref_radius_label">Search radius</string>
     <string name="permission_location_rationale">Location permission is needed to find cinemas near you.</string>
     <string name="permission_calendar_rationale">Calendar permission is needed to sync movie sessions to your calendar.</string>
+    <string name="hint_suburb_or_address">Suburb or address (e.g. Newtown, Sydney)</string>
+    <string name="empty_cinemas_address">No cinemas found near that location.\nTry a different suburb or increase the radius.</string>
 </resources>

@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -15,7 +17,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import com.cinemasync.app.R
 import com.cinemasync.app.databinding.FragmentCinemasBinding
 import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
@@ -51,10 +52,30 @@ class CinemasFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
+        setupSuburbSearch()
         setupRadiusChips()
         setupSwipeRefresh()
         observeState()
         checkLocationAndLoad()
+    }
+
+    private fun setupSuburbSearch() {
+        binding.editSuburb.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                val query = binding.editSuburb.text?.toString().orEmpty()
+                viewModel.searchBySuburb(query)
+                hideKeyboard()
+                true
+            } else {
+                false
+            }
+        }
+    }
+
+    private fun hideKeyboard() {
+        val imm = requireContext().getSystemService(InputMethodManager::class.java)
+        imm?.hideSoftInputFromWindow(binding.editSuburb.windowToken, 0)
+        binding.editSuburb.clearFocus()
     }
 
     private fun setupRecyclerView() {

@@ -15,6 +15,28 @@
             android:layout_height="?attr/actionBarSize"
             app:title="@string/title_cinemas_nearby" />
 
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layout_suburb_input"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            app:endIconMode="clear_text"
+            android:hint="@string/hint_suburb_or_address">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_suburb"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:singleLine="true" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
