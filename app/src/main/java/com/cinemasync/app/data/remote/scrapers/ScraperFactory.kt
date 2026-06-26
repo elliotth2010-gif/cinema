@@ -9,18 +9,25 @@ import javax.inject.Singleton
 class ScraperFactory @Inject constructor(
     private val hoytsScraper: HoytsScraper,
     private val eventCinemasScraper: EventCinemasScraper,
-    private val villageScraper: VillageScraper
+    private val villageScraper: VillageScraper,
+    private val arthouseScraper: ArthouseScraper
 ) {
     fun scraperFor(cinema: Cinema): BaseCinemaScraper = when (cinema.chain) {
         CinemaChain.HOYTS -> hoytsScraper
         CinemaChain.EVENT -> eventCinemasScraper
         CinemaChain.VILLAGE -> villageScraper
+        CinemaChain.PALACE,
+        CinemaChain.DENDY,
+        CinemaChain.RITZ,
+        CinemaChain.ORPHEUM,
+        CinemaChain.INDEPENDENT -> arthouseScraper
         else -> eventCinemasScraper
     }
 
     fun allScrapers(): List<BaseCinemaScraper> = listOf(
         hoytsScraper,
         eventCinemasScraper,
-        villageScraper
+        villageScraper,
+        arthouseScraper
     )
 }

@@ -12,11 +12,29 @@ An Android app that scrapes nearby cinemas, shows movie sessions, and lets you s
 
 ## Supported Cinema Chains
 
+### Major chains
 | Chain | Country | Method |
 |-------|---------|--------|
 | Hoyts | Australia / NZ | JSON API |
 | Event Cinemas | Australia | GraphQL |
 | Village Cinemas | Australia | JSON / HTML scraper |
+
+### Arthouse & independent
+Curated registry of known venues (verified coordinates) with best-effort HTML
+session scraping:
+
+| Venue | Suburb |
+|-------|--------|
+| Ritz Cinemas | Randwick |
+| Hayden Orpheum Picture Palace | Cremorne |
+| Dendy Newtown | Newtown |
+| Dendy Opera Quays | Circular Quay |
+| Palace Norton Street | Leichhardt |
+| Palace Verona | Paddington |
+| Palace Central | Chippendale |
+| Chauvel Cinema | Paddington |
+
+New independent venues can be added in `ArthouseCinemaRegistry.kt`.
 
 ## Building
 
