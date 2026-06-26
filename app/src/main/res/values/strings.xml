@@ -15,4 +15,5 @@
     <string name="permission_location_rationale">Location permission is needed to find cinemas near you.</string>
     <string name="permission_calendar_rationale">Calendar permission is needed to sync movie sessions to your calendar.</string>
     <string name="hint_pick_cinema">Pick a cinema</string>
+    <string name="action_view_online">View sessions on website</string>
 </resources>

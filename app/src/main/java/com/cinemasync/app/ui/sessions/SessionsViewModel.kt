@@ -34,11 +34,17 @@ class SessionsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<SessionsUiState>(SessionsUiState.Loading)
     val uiState: StateFlow<SessionsUiState> = _uiState.asStateFlow()
 
+    private val _cinemaWebsiteUrl = MutableStateFlow("")
+    val cinemaWebsiteUrl: StateFlow<String> = _cinemaWebsiteUrl.asStateFlow()
+
     private var currentCinemaId: String? = null
     private var selectedDateMs: Long = todayMs()
 
     fun loadSessions(cinemaId: String) {
         currentCinemaId = cinemaId
+        viewModelScope.launch {
+            repository.getCinemaById(cinemaId)?.let { _cinemaWebsiteUrl.value = it.websiteUrl }
+        }
         viewModelScope.launch {
             repository.getSessionsForCinema(cinemaId).collect { sessions ->
                 val items = sessions.mapNotNull { session ->

@@ -20,15 +20,11 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.cinemasync.app.databinding.FragmentSessionsBinding
 import com.google.android.material.chip.Chip
-import com.google.android.material.datepicker.CalendarConstraints
-import com.google.android.material.datepicker.DateValidatorPointForward
-import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
 import java.util.Locale
 
 @AndroidEntryPoint
@@ -64,12 +60,20 @@ class SessionsFragment : Fragment() {
         setupToolbar()
         setupAdapter()
         setupDateChips()
+        setupViewOnlineButton()
         observeState()
         viewModel.loadSessions(args.cinemaId)
     }
 
     private fun setupToolbar() {
         binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
+    }
+
+    private fun setupViewOnlineButton() {
+        binding.btnViewOnline.setOnClickListener {
+            val url = viewModel.cinemaWebsiteUrl.value.ifBlank { return@setOnClickListener }
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        }
     }
 
     private fun setupAdapter() {
@@ -121,11 +125,12 @@ class SessionsFragment : Fragment() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
                     binding.progressBar.isVisible = state is SessionsUiState.Loading
-                    binding.textEmpty.isVisible = state is SessionsUiState.Success && state.items.isEmpty()
+                    binding.layoutEmpty.isVisible = state is SessionsUiState.Success && state.items.isEmpty()
 
                     when (state) {
                         is SessionsUiState.Success -> adapter.submitList(state.items)
                         is SessionsUiState.Error -> {
+                            binding.layoutEmpty.isVisible = true
                             Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
                         }
                         else -> {}
