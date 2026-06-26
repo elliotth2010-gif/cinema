@@ -52,6 +52,12 @@ class CinemaRepository @Inject constructor(
 
     suspend fun getCinemaById(id: String): Cinema? = cinemaDao.getCinemaById(id)
 
+    /** Persists a known venue (e.g. one picked from the cinema dropdown) so its
+     *  sessions can be loaded without a location lookup. */
+    suspend fun addKnownCinema(cinema: Cinema): Unit = withContext(Dispatchers.IO) {
+        cinemaDao.insertCinema(cinema)
+    }
+
     suspend fun refreshNearbyCinemas(lat: Double, lng: Double, radiusKm: Double): Result<List<Cinema>> =
         withContext(Dispatchers.IO) {
             try {

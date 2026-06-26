@@ -16,23 +16,21 @@
             app:title="@string/title_cinemas_nearby" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/layout_suburb_input"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:id="@+id/layout_cinema_picker"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu.Dense"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
             android:paddingTop="4dp"
             android:paddingBottom="4dp"
-            app:endIconMode="clear_text"
-            android:hint="@string/hint_suburb_or_address">
+            android:hint="@string/hint_pick_cinema">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/edit_suburb"
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/dropdown_cinema"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:imeOptions="actionSearch"
-                android:inputType="text"
+                android:inputType="none"
                 android:singleLine="true" />
 
         </com.google.android.material.textfield.TextInputLayout>

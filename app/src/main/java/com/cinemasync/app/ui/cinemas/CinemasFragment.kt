@@ -6,8 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
+import android.widget.ArrayAdapter
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -17,6 +16,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.cinemasync.app.data.model.Cinema
 import com.cinemasync.app.databinding.FragmentCinemasBinding
 import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
@@ -52,30 +52,41 @@ class CinemasFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
-        setupSuburbSearch()
+        setupCinemaDropdown()
         setupRadiusChips()
         setupSwipeRefresh()
         observeState()
+        observeNavigation()
         checkLocationAndLoad()
     }
 
-    private fun setupSuburbSearch() {
-        binding.editSuburb.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                val query = binding.editSuburb.text?.toString().orEmpty()
-                viewModel.searchBySuburb(query)
-                hideKeyboard()
-                true
-            } else {
-                false
-            }
+    private fun setupCinemaDropdown() {
+        val cinemas = viewModel.selectableCinemas
+        val labels = cinemas.map { "${it.name} — ${it.suburb}" }
+        val dropdownAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_list_item_1,
+            labels
+        )
+        binding.dropdownCinema.setAdapter(dropdownAdapter)
+        binding.dropdownCinema.setOnItemClickListener { _, _, position, _ ->
+            val cinema: Cinema = cinemas[position]
+            // Clear the selection text so the field reads as a fresh picker next time.
+            binding.dropdownCinema.setText("", false)
+            binding.dropdownCinema.clearFocus()
+            viewModel.selectCinema(cinema)
         }
     }
 
-    private fun hideKeyboard() {
-        val imm = requireContext().getSystemService(InputMethodManager::class.java)
-        imm?.hideSoftInputFromWindow(binding.editSuburb.windowToken, 0)
-        binding.editSuburb.clearFocus()
+    private fun observeNavigation() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.navigateToCinema.collect { cinemaId ->
+                    val action = CinemasFragmentDirections.actionCinemasToSessions(cinemaId)
+                    findNavController().navigate(action)
+                }
+            }
+        }
     }
 
     private fun setupRecyclerView() {

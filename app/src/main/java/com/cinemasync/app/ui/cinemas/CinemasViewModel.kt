@@ -1,21 +1,19 @@
 package com.cinemasync.app.ui.cinemas
 
-import android.content.Context
-import android.location.Geocoder
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinemasync.app.data.model.Cinema
+import com.cinemasync.app.data.remote.scrapers.ArthouseCinemaRegistry
 import com.cinemasync.app.data.repository.CinemaRepository
 import com.cinemasync.app.util.LocationHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.util.Locale
 import javax.inject.Inject
 
 sealed class CinemasUiState {
@@ -27,7 +25,6 @@ sealed class CinemasUiState {
 
 @HiltViewModel
 class CinemasViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
     private val repository: CinemaRepository,
     private val locationHelper: LocationHelper
 ) : ViewModel() {
@@ -37,6 +34,18 @@ class CinemasViewModel @Inject constructor(
 
     private val _radiusKm = MutableStateFlow(20.0)
     val radiusKm: StateFlow<Double> = _radiusKm.asStateFlow()
+
+    /** Emits a cinema id when a venue is picked from the dropdown, so the
+     *  fragment can navigate straight to its sessions/movies. */
+    private val _navigateToCinema = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val navigateToCinema: SharedFlow<String> = _navigateToCinema.asSharedFlow()
+
+    /** Known venues offered in the "pick a cinema" dropdown. These have fixed
+     *  session pages, so they work regardless of GPS or where the user is. */
+    val selectableCinemas: List<Cinema> =
+        ArthouseCinemaRegistry.venues
+            .map { ArthouseCinemaRegistry.toCinema(it, 0.0) }
+            .sortedBy { it.name }
 
     init {
         observeCinemas()
@@ -54,6 +63,14 @@ class CinemasViewModel @Inject constructor(
         }
     }
 
+    /** Persist the chosen venue, then ask the fragment to open its sessions. */
+    fun selectCinema(cinema: Cinema) {
+        viewModelScope.launch {
+            repository.addKnownCinema(cinema)
+            _navigateToCinema.emit(cinema.id)
+        }
+    }
+
     fun refreshNearby() {
         viewModelScope.launch {
             _uiState.value = CinemasUiState.Loading
@@ -62,7 +79,7 @@ class CinemasViewModel @Inject constructor(
                     ?: locationHelper.getLastKnownLocation()
 
                 if (location == null) {
-                    _uiState.value = CinemasUiState.Error("Could not determine location. Please enable GPS.")
+                    _uiState.value = CinemasUiState.Error("Could not determine location. Pick a cinema from the list above, or enable GPS.")
                     return@launch
                 }
 
@@ -85,42 +102,7 @@ class CinemasViewModel @Inject constructor(
 
     fun setRadius(km: Double) {
         _radiusKm.value = km
-        // Re-search using whatever source was last used
-        if (_manualAddress.value.isNotBlank()) searchBySuburb(_manualAddress.value) else refreshNearby()
-    }
-
-    private val _manualAddress = MutableStateFlow("")
-
-    fun searchBySuburb(query: String) {
-        _manualAddress.value = query.trim()
-        if (query.isBlank()) {
-            refreshNearby()
-            return
-        }
-        viewModelScope.launch {
-            _uiState.value = CinemasUiState.Loading
-            try {
-                val results = withContext(Dispatchers.IO) {
-                    @Suppress("DEPRECATION")
-                    Geocoder(context, Locale.getDefault()).getFromLocationName(query, 1)
-                }
-                if (results.isNullOrEmpty()) {
-                    _uiState.value = CinemasUiState.Error("Could not find \"$query\". Try a more specific suburb or city.")
-                    return@launch
-                }
-                val addr = results[0]
-                val result = repository.refreshNearbyCinemas(
-                    lat = addr.latitude,
-                    lng = addr.longitude,
-                    radiusKm = _radiusKm.value
-                )
-                result.onFailure {
-                    _uiState.value = CinemasUiState.Error("Failed to load cinemas: ${it.message}")
-                }
-            } catch (e: Exception) {
-                _uiState.value = CinemasUiState.Error("Location lookup failed: ${e.message}")
-            }
-        }
+        refreshNearby()
     }
 
     fun toggleFavourite(cinemaId: String) {
