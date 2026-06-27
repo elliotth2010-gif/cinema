@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CinemaSync</string>
+    <string name="title_my_calendar">My Calendar</string>
+    <string name="title_cinemas_nearby">Nearby Cinemas</string>
+    <string name="title_sessions">Sessions</string>
+    <string name="label_upcoming_sessions">Upcoming Synced Sessions</string>
+    <string name="empty_calendar">No sessions synced yet.\nBrowse cinemas to find sessions and add them to your calendar.</string>
+    <string name="empty_cinemas">No cinemas found nearby.\nTry increasing the search radius.</string>
+    <string name="empty_sessions">No sessions available for this date.</string>
+    <string name="action_add_to_calendar">Add to calendar</string>
+    <string name="action_book_tickets">Book tickets</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="pref_radius_label">Search radius</string>
+    <string name="permission_location_rationale">Location permission is needed to find cinemas near you.</string>
+    <string name="permission_calendar_rationale">Calendar permission is needed to sync movie sessions to your calendar.</string>
+    <string name="hint_pick_cinema">Pick a cinema</string>
+    <string name="action_view_online">View sessions on website</string>
+</resources>

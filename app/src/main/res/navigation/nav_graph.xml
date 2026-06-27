@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.cinemasync.app.ui.home.HomeFragment"
+        android:label="@string/title_my_calendar"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/cinemasFragment"
+        android:name="com.cinemasync.app.ui.cinemas.CinemasFragment"
+        android:label="@string/title_cinemas_nearby"
+        tools:layout="@layout/fragment_cinemas">
+
+        <action
+            android:id="@+id/action_cinemas_to_sessions"
+            app:destination="@id/sessionsFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/sessionsFragment"
+        android:name="com.cinemasync.app.ui.sessions.SessionsFragment"
+        android:label="@string/title_sessions"
+        tools:layout="@layout/fragment_sessions">
+
+        <argument
+            android:name="cinemaId"
+            app:argType="string" />
+
+    </fragment>
+
+</navigation>

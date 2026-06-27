@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/homeFragment"
+        android:icon="@android:drawable/ic_menu_my_calendar"
+        android:title="@string/title_my_calendar" />
+
+    <item
+        android:id="@+id/cinemasFragment"
+        android:icon="@android:drawable/ic_menu_mapmode"
+        android:title="@string/title_cinemas_nearby" />
+
+</menu>
