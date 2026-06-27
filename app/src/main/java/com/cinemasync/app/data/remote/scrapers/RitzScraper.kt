@@ -185,13 +185,14 @@ class RitzScraper @Inject constructor(
     private fun cmsHtml(cinema: Cinema, doc: Document, dateMs: Long): ScraperResult {
         val movies   = mutableListOf<Movie>()
         val sessions = mutableListOf<Session>()
-        var blocks = doc.select(
+        var blocks: List<org.jsoup.nodes.Element> = doc.select(
             ".film, .movie, .now-showing-item, .whats-on-item, article[class*=film], article[class*=movie], " +
             "[class*=film-block], [class*=movie-block], .event-item, .screening"
         )
         if (blocks.isEmpty()) {
             // Broader: any article/card that has a booking/session link inside
             blocks = doc.select("article, .card, .item, .entry, li[class*=film], li[class*=movie]")
+                .toList()
                 .filter { it.select("a[href*=book], a[href*=ticket], a[href*=session]").isNotEmpty() }
         }
         blocks.forEach { block ->

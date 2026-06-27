@@ -153,12 +153,13 @@ class DendyScraper @Inject constructor(
     private fun sessionHtml(cinema: Cinema, doc: Document, dateMs: Long): ScraperResult {
         val movies   = mutableListOf<Movie>()
         val sessions = mutableListOf<Session>()
-        var blocks = doc.select(
+        var blocks: List<org.jsoup.nodes.Element> = doc.select(
             "[class*=MovieCard], [class*=movie-card], [class*=FilmCard], [class*=film-card], " +
             "[class*=session-group], [class*=SessionGroup], .movie, .film, article[class*=film]"
         )
         if (blocks.isEmpty()) {
             blocks = doc.select("article, .card, [class*=card]")
+                .toList()
                 .filter { it.select("a[href*=session], a[href*=book], a[href*=ticket], [class*=time]").isNotEmpty() }
         }
         blocks.forEach { block ->
