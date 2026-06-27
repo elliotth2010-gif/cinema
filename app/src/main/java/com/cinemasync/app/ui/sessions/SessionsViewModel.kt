@@ -3,6 +3,7 @@ package com.cinemasync.app.ui.sessions
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinemasync.app.data.model.Cinema
+import com.cinemasync.app.data.model.CinemaChain
 import com.cinemasync.app.data.model.Movie
 import com.cinemasync.app.data.model.Session
 import com.cinemasync.app.data.remote.scrapers.ArthouseCinemaRegistry
@@ -35,6 +36,11 @@ class SessionsViewModel @Inject constructor(
     private val repository: CinemaRepository
 ) : ViewModel() {
 
+    private companion object {
+        /** Chains with dedicated scrapers that render results in the list (no WebView). */
+        val SCRAPED_CHAINS = setOf(CinemaChain.RITZ, CinemaChain.DENDY)
+    }
+
     private val _uiState = MutableStateFlow<SessionsUiState>(SessionsUiState.Loading)
     val uiState: StateFlow<SessionsUiState> = _uiState.asStateFlow()
 
@@ -55,9 +61,11 @@ class SessionsViewModel @Inject constructor(
             val cinema = repository.getCinemaById(cinemaId) ?: return@launch
             _cinemaWebsiteUrl.value = cinema.websiteUrl
             val venue = ArthouseCinemaRegistry.venueForCinema(cinema)
-            arthouseVenue = venue
-            if (venue != null) {
-                _webViewUrl.value = urlForDate(venue, selectedDateMs)
+            // Ritz and Dendy have dedicated scrapers — show their results in the
+            // list. Only venues without a working scraper fall back to the WebView.
+            arthouseVenue = if (cinema.chain in SCRAPED_CHAINS) null else venue
+            if (arthouseVenue != null) {
+                _webViewUrl.value = urlForDate(arthouseVenue!!, selectedDateMs)
             }
         }
         viewModelScope.launch {

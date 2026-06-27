@@ -10,15 +10,17 @@ class ScraperFactory @Inject constructor(
     private val hoytsScraper: HoytsScraper,
     private val eventCinemasScraper: EventCinemasScraper,
     private val villageScraper: VillageScraper,
-    private val arthouseScraper: ArthouseScraper
+    private val arthouseScraper: ArthouseScraper,
+    private val ritzScraper: RitzScraper,
+    private val dendyScraper: DendyScraper
 ) {
     fun scraperFor(cinema: Cinema): BaseCinemaScraper = when (cinema.chain) {
         CinemaChain.HOYTS -> hoytsScraper
         CinemaChain.EVENT -> eventCinemasScraper
         CinemaChain.VILLAGE -> villageScraper
+        CinemaChain.RITZ -> ritzScraper
+        CinemaChain.DENDY -> dendyScraper
         CinemaChain.PALACE,
-        CinemaChain.DENDY,
-        CinemaChain.RITZ,
         CinemaChain.ORPHEUM,
         CinemaChain.INDEPENDENT -> arthouseScraper
         else -> eventCinemasScraper
@@ -28,6 +30,8 @@ class ScraperFactory @Inject constructor(
         hoytsScraper,
         eventCinemasScraper,
         villageScraper,
-        arthouseScraper
+        arthouseScraper,
+        ritzScraper,
+        dendyScraper
     )
 }
